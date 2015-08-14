@@ -72,3 +72,76 @@ Feeling uninspired by the portfolio? Here's a list of cool portfolios I found af
 * <a href="http://nicoledominguez.com/portfolio/">http://nicoledominguez.com/portfolio/</a>
 * <a href="http://www.roxannecook.com/">http://www.roxannecook.com/</a>
 * <a href="http://www.84colors.com/portfolio.html">http://www.84colors.com/portfolio.html</a>
+
+
+##First time run : grunt pagespeed task result
+grunt-pagespeed@0.2.0 node_modules/grunt-pagespeed
+└── psi@0.0.3 (minimist@0.1.0, gpagespeed@0.0.6, request@2.60.0)
+roboChoc $ grunt
+Running "psi-ngrok" task
+
+Running "pagespeed:local" (pagespeed) task
+Running Pagespeed Insights
+Pagespeed Insights: Processing results
+
+----------------------------------------------------------------
+
+URL:      https://77ed901d.ngrok.com/
+Strategy: desktop
+Score:    88
+
+----------------------------------------------------------------
+
+Number Resources                                 | 13
+Number Hosts                                     | 7
+Total Request Bytes                              | 1273
+Number Static Resources                          | 9
+Html Response Bytes                              | 3113
+Css Response Bytes                               | 3428
+Image Response Bytes                             | 29321
+Javascript Response Bytes                        | 26378
+Other Response Bytes                             | 42136
+Number Js Resources                              | 2
+Number Css Resources                             | 3
+
+----------------------------------------------------------------
+
+Avoid Landing Page Redirects                     | 0
+Enable Gzip Compression                          | 0.15
+Leverage Browser Caching                         | 2.49
+Main Resource Server Response Time               | 0
+Minify Css                                       | 0
+Minify HTML                                      | 0
+Minify Java Script                               | 0
+Minimize Render Blocking Resources               | 8
+Optimize Images                                  | 0.98
+Prioritize Visible Content                       | 0
+
+----------------------------------------------------------------
+
+
+Running "pagespeed:mobile" (pagespeed) task
+Running Pagespeed Insights
+Pagespeed Insights: Processing results
+
+----------------------------------------------------------------
+
+URL:      https://77ed901d.ngrok.com/
+Strategy: mobile
+Score:    73
+
+----------------------------------------------------------------
+
+Number Resources                                 | 13
+Number Hosts                                     | 7
+Total Request Bytes                              | 1267
+Number Static Resources                          | 9
+Html Response Bytes                              | 3113
+Css Response Bytes                               | 3428
+Image Response Bytes                             | 29321
+Javascript Response Bytes                        | 26378
+Other Response Bytes                             | 29312
+Number Js Resources                              | 2
+Number Css Resources                             | 3
+
+----------------------------------------------------------------
