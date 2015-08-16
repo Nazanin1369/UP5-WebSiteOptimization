@@ -3,9 +3,8 @@
 var gulp                  = require('gulp'),
         concat            = require('gulp-concat'),
         uglify            = require('gulp-uglify'),
-        imagemin          = require('gulp-imagemin'),
-        imageminJpegtran  = require('imagemin-jpegtran'),
         imageop           = require('gulp-image-optimization'),
+        imageMin          = require('gulp-imagemin'),
         clean             = require('gulp-clean'),
         sourcemaps        = require('gulp-sourcemaps'),
         del               = require('del'),
@@ -15,7 +14,6 @@ var gulp                  = require('gulp'),
         cached            = require('gulp-cached'),
         plumber           = require('gulp-plumber'),
         gutil             = require('gulp-util'),
-        minifyHTML        = require('gulp-minify-html'),
         psi 			        = require('psi'),
 	      ngrok 			      = require('ngrok'),
 	      cp 				        = require('child_process'),
@@ -23,13 +21,11 @@ var gulp                  = require('gulp'),
         rename 			      = require('gulp-rename'),
         jshint 			      = require('gulp-jshint'),
         changed 		      = require('gulp-changed'),
-        newer 			      = require('gulp-newer'),
 	      parallel 		      = require('concurrent-transform'),
 	      os 				        = require('os-utils'),
         cwebp 			      = require('gulp-cwebp'),
 	      imageResize 	    = require('gulp-image-resize'),
         sequence          = require('run-sequence'),
-        process           = require('gulp-exit'),
         connect           = require('gulp-connect'),
         minifyCss         = require('gulp-minify-css'),
         gzip              = require('gulp-gzip'),
@@ -41,8 +37,10 @@ var gulp                  = require('gulp'),
 var paths = {
   app: 'UP5-WebSiteOptimization/',
   scripts: {
-    src: ['js/*', 'view/js/*'], 
+    src: ['js/*', 'views/js/*'], 
+    dest: 'build/js',
     destProd: 		'html/build/js',
+    destVen: 		'assets/js/vendor',
     script: 		'build/js/main.js',
 		scriptProd: 	'html/build/js/main.js',
 		scriptMin: 		'build/js/main.min.js',
@@ -58,11 +56,11 @@ var paths = {
 		]
 	},
   images: {
-    src:  			['img/*.{png, svg, gif, webp}', 'views/images/*.{png, svg, gif, webp}'],
-    jpegSrc:    ['img/*.jpg', 'views/images/*.jpg'],
+    src:  			['img/*.{jpg, png, svg, gif, webp}', 'views/images/*.{jpg, png, svg, gif, webp}'],
+    srcPng:     ['img/*.png', 'views/images/*.png'],
 		dest: 			'build/img/',
 		destProd: 	'html/build/img',
-		watch:  		['img/*.{jpg, png, svg, gif, webp', 'views/images/*.{jpg, png, svg, gif, webp}'],
+		watch:  		['img/*.{jpg, png, svg, gif, webp}', 'views/images/*.{jpg, png, svg, gif, webp}'],
 		watchOpt: 	'build/img/opt/*.{jpg, png, svg, gif, webp}',
 		watchDest: 	'build/img/*.{jpg, png, svg, gif, webp}',
 		watchProd: 	'html/build/img/**/*.{jpg, png, svg, gif, webp}' 
@@ -70,28 +68,13 @@ var paths = {
   css: { 
     src: ['css/*', 'views/css/*'], 
     dest: 'html/build/css'
-  },
-  html: {
-    dest: 'html',
-    watch: ['index.html', '_layouts/*.html', '_includes/**/*', '_posts/**/*'],
-  	watchProd: 'html/**/*.html'
   }
-  
 };
-
-var messages = {
-    udacityBuild: '<span style="color: grey">Running:</span> $ udacity build'
-};
-
 
 var onError	= function(err) {
 	gutil.beep();
 	gutil.log(gutil.colors.green(err + '\n'));
 };
-
-gulp.task('browser-sync', function() {
-    browserSync({server: {baseDir: paths.html.dest}});
-});
 
 /**
  * Clean
@@ -102,11 +85,9 @@ gulp.task('clear-cache', function(done) {
 });
 
 gulp.task('clean', function() {
-   del(['html']);
-   del(['build']);
-  return gulp.src(paths.html.dest, {read: false})
-    .pipe(clean())
-    .pipe(notify('clean is done.\n'));
+  del(['html']);
+  del(['build']);
+  notify('clean is done.\n');
 });
 
 /**
@@ -115,8 +96,7 @@ gulp.task('clean', function() {
  gulp.task('build-css', function() {
   return gulp.src(paths.css.src)
     .pipe(sourcemaps.init())
-    .pipe(minifyCss())
-    .pipe(cache(gzip()))
+    .pipe(cache(minifyCss()))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(paths.css.dest))
     .pipe(notify('minify-css is done.\n'));
@@ -133,30 +113,22 @@ gulp.task('jshint-gulp', function () {
 });
 
 gulp.task('jshint', ['jshint-gulp'], function () {
-	return gulp.src(paths.scripts.script)
+	return gulp.src(paths.scripts.src)
 	    .pipe(cache(jshint('.jshintrc')))
         .pipe(jshint.reporter('jshint-stylish'))
 	    .pipe(notify('jshint-gulp is done.\n'));
 });
 
-gulp.task('concat', ['jshint'], function () {
+gulp.task('build-scripts', ['jshint'], function () {
 	return gulp.src(paths.scripts.src)
-		.pipe(concat('all.js'))
-		.pipe(gulp.dest(paths.scripts.destProd))
-		.pipe(size({showFiles: true}));
-});
-
-gulp.task('build-scripts', ['concat'], function () {
-	return gulp.src(paths.scripts.bundleMain)
 		.pipe(uglify())
 		.pipe(rename({suffix: '.min'}))
-		.pipe(gulp.dest(paths.scripts.dest))
 		.pipe(gulp.dest(paths.scripts.destProd))
 		.pipe(notify('js is done.\n'));
 });
 
 gulp.task('js-reload', ['build-scripts'], function () {
-	return gulp.src(paths.scripts.bundleMainMin)
+	return gulp.src(paths.scripts.destProd)
 		.pipe(plumber({errorHandler: onError}))
 		.pipe(reload({stream:true}));
 });
@@ -164,8 +136,16 @@ gulp.task('js-reload', ['build-scripts'], function () {
 /**
  * Images
  */
- 
-gulp.task('image-opt',  function () {
+gulp.task('image-min', function () {
+	return gulp.src(paths.images.srcPng)
+		.pipe(plumber({errorHandler: onError}))
+		.pipe(imageMin({optimizationLevel: 3, progressive: true, interlaced: true}))
+		.pipe(gulp.dest(paths.images.destProd))
+		.pipe(size({showFiles: true}))
+		.pipe(notify('image-min is done.\n'));
+});
+
+gulp.task('image-opt', ['image-min'], function () {
     return gulp.src(paths.images.src)
        .pipe(cache(imageop({
         optimizationLevel: 5,
@@ -240,37 +220,11 @@ gulp.task('img-reload', ['build-images'], function () {
 		.pipe(reload({stream:true}))
 	  .pipe(notify('img-reload is done.\n'));
 });
-/**
- * build
- */
- 
-
-
-gulp.task('udacity', function() {
-  	return gulp.src(paths.html.watchProd)
-	    .pipe(minifyHTML())
-	    .pipe(gulp.dest(paths.html.dest));
-});
-
-gulp.task('udacity-rebuild', ['udacity'], function () {
-    reload();
-});
 
 /**
  * ngrok
  */
- 
- /*gulp.task('browser-sync-psi', ['udacity-rebuild'], function() {
-  browserSync({
-    port: portVal,
-    open: false,
-    server: {
-      baseDir: paths.app
-    }
-  });
-});*/
-
- gulp.task('server-start',  function (done) {
+gulp.task('server-start',  function (done) {
    return connect.server({
      livereload: true
     });
@@ -289,18 +243,18 @@ gulp.task('psi-desktop', function (cb) {
     nokey: 'true',
     strategy: 'desktop'
   }, function (err, data) {
-    console.log('-----------*Desktop*-------------')
+    console.log('-----------*Desktop*-------------');
     console.log('Score: ', data.score);
     console.log(data.pageStats);
   });
 });
 
-gulp.task('psi-mobile', function (cb) {
+gulp.task('psi-mobile', function () {
   psi(site, {
     nokey: 'true',
     strategy: 'mobile'
   }, function (err, data) {
-    console.log('-----------*Mobile*-------------')
+    console.log('-----------*Mobile*-------------');
     console.log('Score: ', data.score);
     console.log(data.pageStats);
   });
@@ -316,8 +270,7 @@ gulp.task('psi-seq', function (cb) {
 });
 
 gulp.task('psi', ['psi-seq'], function() {
-  console.log('Woohoo! Check out your page speed scores!')
-  //process.exit();
+  console.log('Woohoo! Check out your page speed scores!');
 });
 
 /**
@@ -334,8 +287,7 @@ gulp.task('watch', function() {
 gulp.task('optimize', function(callback) {
   sequence('clean',
               'watch',
-              ['build-css', 'build-scripts', 'build-images'],
-              //'build-html',
+              ['build-css', 'build-scripts', 'image-opt'],
               'psi',
               'server-start',
               callback);

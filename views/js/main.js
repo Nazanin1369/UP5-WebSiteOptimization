@@ -378,7 +378,7 @@ var pizzaElementGenerator = function(i) {
   pizzaContainer.id = "pizza" + i;                // gives each pizza element a unique id
   pizzaImageContainer.classList.add("col-md-6");
 
-  pizzaImage.src = "images/pizza.png";
+  pizzaImage.src = "../html/build/img/pizza.png";
   pizzaImage.classList.add("img-responsive");
   pizzaImageContainer.appendChild(pizzaImage);
   pizzaContainer.appendChild(pizzaImageContainer);
@@ -450,9 +450,12 @@ var resizePizzas = function(size) {
 
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
+    /**Change: Calc the width once */
+    var examplePizza = document.querySelectorAll(".randomPizzaContainer")[0];
+    var dx = determineDx(examplePizza, size);
+    var newwidth = (examplePizza.offsetWidth + dx) + 'px';
+    // loop through all pizzas and change width to determined newWidth
     for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
       document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
     }
   }
@@ -499,12 +502,25 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 
 // Moves the sliding background pizzas based on scroll position
 function updatePositions() {
+  /**Changes */
   frame++;
   window.performance.mark("mark_start_frame");
 
   var items = document.querySelectorAll('.mover');
+  // calculate number based on scroll position, same for all pizzas
+  var bodyNum = (document.body.scrollTop / 1250);
+  // calculate phase number for all possible outcomes of n % 5
+  var phaseNums = [
+                    Math.sin(bodyNum + 0),
+                    Math.sin(bodyNum + 1),
+                    Math.sin(bodyNum + 2),
+                    Math.sin(bodyNum + 3),
+                    Math.sin(bodyNum + 4)
+                  ];
+
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    // set correct phase number based on i % 5
+    var phase = phaseNums[i%5];
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
 
@@ -528,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
   for (var i = 0; i < 200; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
-    elem.src = "images/pizza.png";
+    elem.src = "../html/build/img/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
     elem.basicLeft = (i % cols) * s;
