@@ -12,6 +12,9 @@ Then pen http://localhost:8080/ in your browser.
 
 #### Changes applied
 * used @fontface to optimize webfonts
+* used **async** property for non-critical script to prevert blocking the page rendering.
+* **Deferred loading the style.css** file tp pace the page rendering
+* removed remote sources for images and made them **local** in index.html
 * used **gulp-uglify** and **gulp-minify-css** to minify css and javascript files
 * removed redundant css rules
 * used **jshint-gulp** as JS linting
@@ -21,14 +24,16 @@ Then pen http://localhost:8080/ in your browser.
 
 ## Part 2: pizza.html
 
+The pizza.html webpage was rendering at < 30fps for scrolling. Also, resizing the pizza on the slider took an average of > 200 ms.
+
 #### Results
 
-- Time to resize pizzas under 5s
+- Time to resize pizzas under 5ms from 200ms
 
 #### Changes applied
 
 * Leveraged browser caching by including _ <meta http-equiv="Cache-control" content="public">_ and .htaccess file
 * Added a complete view port meta tag on _pizza.html_ page.
-* Optimized main.js by removing the redundant calculation from updatePositions() and changePizzaSizes() functions.
+* Optimized main.js by removing the calculation from inside the loop in updatePositions() and changePizzaSizes() functions.
 
 
