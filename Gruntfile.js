@@ -24,6 +24,36 @@ module.exports = function(grunt) {
           strategy: "mobile"
         }
       }
+    },
+    imagemin: {
+      png: {
+        options: {
+          optimizationLevel: 7
+        },
+        files: [
+          {
+            expand: true,
+            cwd: 'UP5-WebSiteOptimization/img',
+            src: ['**/*.png'],
+            dest: 'UP5-WebSiteOptimization/img/compressed/',
+            ext: '.png'
+          }
+        ]
+      },
+      jpg: {
+        options: {
+          progressive: true       
+        },
+        files: [
+          {
+          expand: true,
+          cwd: 'UP5-WebSiteOptimization/img/',
+          src: ['**/*.jpg'],
+          dest: 'UP5-WebSiteOptimization/img/compressed/',
+          ext: '.jpg'
+          }
+        ]
+      }
     }
   });
 
@@ -43,6 +73,10 @@ module.exports = function(grunt) {
     });
   });
 
+
+  grunt.loadNpmTasks('grunt-contrib-imagemin');
+  grunt.registerTask('imagemin', ['imagemin']);
   // Register default tasks
   grunt.registerTask('default', ['psi-ngrok']);
+  
 }
