@@ -12,7 +12,7 @@
    <!-- <link href="//fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">-->
 
     <!--<link href="html/build/css/style.css" rel="stylesheet">-->
-    <link href="html/build/css/print.css" rel="stylesheet" media="print">
+    <link href="html/build/css/print.css.min.gz" rel="stylesheet" media="print">
 
     <script>
       (function(w,g){w['GoogleAnalyticsObject']=g;
@@ -58,7 +58,7 @@
           </li>
 
           <li>
-            <img style="width: 100px;" src="html/build/img/pizzeria-sm.jpg">
+            <img style="width: 100px;" src="html/build/img/pizzeria_sm.jpg">
             <a href="views/pizza.html">Cam's Pizzeria</a>
             <p>Who wants a performant pizza?</p>
           </li>
@@ -71,7 +71,7 @@
     <script>
       var cb = function() {
         var l = document.createElement('link'); l.rel = 'stylesheet';
-        l.href = 'html/build/css/styles.css';
+        l.href = 'html/build/css/styles.css.min.gz';
         var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h);
       };
       var raf = requestAnimationFrame || mozRequestAnimationFrame ||

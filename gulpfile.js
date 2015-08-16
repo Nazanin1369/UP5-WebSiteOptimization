@@ -56,7 +56,7 @@ var paths = {
 		]
 	},
   images: {
-    src:  			['img/*.{jpg, png, svg, gif, webp}', 'views/images/*.{jpg, png, svg, gif, webp}'],
+    src:  			['img/*.{jpg, svg, gif, webp}', 'views/images/*.{jpg, svg, gif, webp}'],
     srcPng:     ['img/*.png', 'views/images/*.png'],
 		dest: 			'build/img/',
 		destProd: 	'html/build/img',
@@ -90,13 +90,23 @@ gulp.task('clean', function() {
   notify('clean is done.\n');
 });
 
+gulp.task('compress-css', function(){
+   return gulp.src('css/print.css')
+    .pipe(sourcemaps.init())
+    .pipe(minifyCss())
+    .pipe(gzip())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest(paths.css.dest))
+    .pipe(notify('minify-css is done.\n'));
+});
 /**
  * Styles
  */
- gulp.task('build-css', function() {
+ gulp.task('build-css', ['compress-css'],  function() {
   return gulp.src(paths.css.src)
     .pipe(sourcemaps.init())
-    .pipe(cache(minifyCss()))
+    .pipe(minifyCss())
+    .pipe(rename({suffix: '.min'}))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(paths.css.dest))
     .pipe(notify('minify-css is done.\n'));
@@ -107,14 +117,14 @@ gulp.task('clean', function() {
  */
 gulp.task('jshint-gulp', function () {
 	return gulp.src('gulpfile.js')
-	    .pipe(cache(jshint('.jshintrc')))
+	    .pipe(jshint('.jshintrc'))
         .pipe(jshint.reporter('jshint-stylish'))
 	    .pipe(notify('jshint-gulp is done.\n'));
 });
 
 gulp.task('jshint', ['jshint-gulp'], function () {
 	return gulp.src(paths.scripts.src)
-	    .pipe(cache(jshint('.jshintrc')))
+	    .pipe(jshint('.jshintrc'))
         .pipe(jshint.reporter('jshint-stylish'))
 	    .pipe(notify('jshint-gulp is done.\n'));
 });
@@ -147,11 +157,11 @@ gulp.task('image-min', function () {
 
 gulp.task('image-opt', ['image-min'], function () {
     return gulp.src(paths.images.src)
-       .pipe(cache(imageop({
+       .pipe(imageop({
         optimizationLevel: 5,
         progressive: true,
         interlaced: true
-        })))
+        }))
       .pipe(gulp.dest(paths.images.destProd))
       .pipe(notify('image-opt is done.\n'));
 });
